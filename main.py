@@ -107,7 +107,7 @@ def main(args):
                 noisy_signal = batch["noisy"].to(device)
                 target_signal = batch["clean"].to(device)
 
-                enhanced_signal, _ = model(noisy_signal)
+                enhanced_signal = model(noisy_signal)
                 target_signal = target_signal[..., : enhanced_signal.shape[-1]]
 
                 if FFT_INPUT:
@@ -154,7 +154,7 @@ def main(args):
                         noisy_signal = batch["noisy"].to(device)
                         target_signal = batch["clean"].to(device)
 
-                        enhanced_signal, _ = model(noisy_signal)
+                        enhanced_signal = model(noisy_signal)
                         target_signal = target_signal[..., : enhanced_signal.shape[-1]]
 
                         if FFT_INPUT:

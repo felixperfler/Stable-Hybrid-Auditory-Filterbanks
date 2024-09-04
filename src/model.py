@@ -48,7 +48,7 @@ class HybridfilterbankModel(nn.Module):
         x_real = mask * x.real
         x_imag = mask * x.imag
 
-        return self.filterbank.decoder(x_real, x_imag), x_real + 1j * x_imag
+        return self.filterbank.decoder(x_real, x_imag)
 
 class FFTModel(nn.Module):
     def __init__(self, fs=16000, signal_length=5):
@@ -99,4 +99,4 @@ class FFTModel(nn.Module):
             * x_fft
         )
 
-        return self.inverse_specgram(x), x
+        return self.inverse_specgram(x)

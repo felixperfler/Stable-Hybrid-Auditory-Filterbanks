@@ -68,7 +68,7 @@ def main(args):
 
             noisy_signal = batch["noisy"]
             target_signal = batch["clean"]
-            enhanced_signal, _ = model(noisy_signal)
+            enhanced_signal = model(noisy_signal)
             target_signal = target_signal[..., : enhanced_signal.shape[-1]]
 
             pesq_values.append(
