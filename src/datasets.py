@@ -4,7 +4,6 @@ import random
 import numpy as np
 import soundfile
 import torch
-from scipy import signal
 from torch.utils.data import Dataset
 
 # set seed
@@ -64,6 +63,7 @@ class Chime2(Dataset):
 
     def __len__(self):
         return len(self.samples)
+        # return 10
 
     def __getitem__(self, idx):
         sample = self.samples[idx]
@@ -99,25 +99,3 @@ class Chime2(Dataset):
                 "clean": clean_sample[: self.fs * self.signal_length],
                 "noisy": noisy_sample[: self.fs * self.signal_length],
             }
-
-
-if __name__ == "__main__":
-
-    data = Chime2(dataset="datasets/chime2_wsj0", signal_length=5, fs=16000)
-    #     data = Chime2(dataset="datasets/chime2_wsj0", type="test", signal_length=5, fs=16000)
-    #     data = Chime2(dataset="datasets/chime2_wsj0", type="dev", signal_length=5, fs=16000)
-    dataloader = torch.utils.data.DataLoader(
-        data,
-        batch_size=32,
-        shuffle=True,
-        num_workers=4,
-    )
-
-    for sample in dataloader:
-
-        #         soundfile.write("clean.wav", sample["clean"][0], 16000)
-        #         soundfile.write("noisy.wav", sample["noisy"][0], 16000)
-
-        print("lala")
-
-#         break
