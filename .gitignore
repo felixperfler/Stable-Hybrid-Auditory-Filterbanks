@@ -6,6 +6,7 @@ __pycache__/
 .vscode/
 logs/
 chime2_wsj0/
+.HybrA/
 
 *.sbatch
 *.out

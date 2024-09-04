@@ -275,7 +275,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dataset",
         type=str,
-        default="datasets/chime2_wsj0",
+        default="chime2_wsj0",
         help="Path to dataset",
     )
     parser.add_argument(
