@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torchaudio.transforms import InverseSpectrogram, Spectrogram
+# from torchaudio.transforms import InverseSpectrogram, Spectrogram
 
 from hybra import HybrA
 
@@ -40,7 +40,7 @@ class HybridfilterbankModel(nn.Module):
 
 
         self.nsnet = NSNet()
-        self.filterbank = HybrA('auditory_filters_speech.pth')
+        self.filterbank = HybrA('./filters/auditory_filters_speech.pth')
 
     def forward(self, x):
         x = self.filterbank(x)
