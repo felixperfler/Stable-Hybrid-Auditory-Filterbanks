@@ -5,6 +5,7 @@ __pycache__/
 .mypy_cache/
 .vscode/
 logs/
+chime2_wsj0/
 
 *.sbatch
 *.out
