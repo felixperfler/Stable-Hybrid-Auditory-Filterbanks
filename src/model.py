@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-# from torchaudio.transforms import InverseSpectrogram, Spectrogram
+from torchaudio.transforms import InverseSpectrogram, Spectrogram
 
 from hybra import HybrA
 
