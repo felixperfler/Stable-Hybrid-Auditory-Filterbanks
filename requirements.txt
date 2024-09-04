@@ -1,0 +1,12 @@
+torch
+torchvision
+torchaudio
+numpy
+scipy
+pandas
+
+soundfile
+pesq
+tensorboardX
+torchmetrics
+tqdm
