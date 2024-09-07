@@ -15,15 +15,6 @@ First, we preprocess the audio signals via a auditory filterbank, guaranteeing g
 Second, we use results from frame theory to define an unsupervised learning objective that encourages energy conservation and perfect reconstruction. Third, we adapt mixed compressed spectral norms as learning objectives to the encoder coefficients. 
 Using these solutions in a low-complexity encoder—mask—decoder model significantly improves the perceptual evaluation of speech quality (PESQ) in speech enhancement.
 
-| Encoder              | Params | Objective              | $\kappa$-penalization  | PESQ | SI-SDR | $\kappa$  |
-| -------------------- | ------ | ---------------------- | ---------------------- | ---- | ------ | --------- |
-| STFT (baseline)      | 0      | $MCS$                  | ❌                     | 3.19 | 9.85   | 2         |
-| audlet (ours)        | 0      | $MCS$                  | ❌                     | 3.23 | 9.58   | 1         |
-| conv1D               | 8.1k   | $MCS$                  | ❌                     | 2.66 | 11.69  | 3.2       |
-| conv1D               | 8.1k   | $MCS_{\beta}$          | ✅                     | 2.77 | 11.99  | 1         |
-| hybrid audlet (ours) | 2.8k   | $MCS$                  | ❌                     | 3.38 | 8.86   | 1.2       |
-| hybrid audlet (ours) | 2.8k   | $MCS_{\beta}$          | ✅                     | 3.39 | 8.68   | 1         |
-
 ## Usage
 
 ### Installation
