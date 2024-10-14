@@ -9,3 +9,5 @@ pesq
 tensorboardX
 torchmetrics
 tqdm
+
+hybra

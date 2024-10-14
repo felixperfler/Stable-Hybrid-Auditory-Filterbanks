@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from torchaudio.transforms import InverseSpectrogram, Spectrogram
 
 from hybra import HybrA
 
@@ -45,58 +44,5 @@ class HybridfilterbankModel(nn.Module):
     def forward(self, x):
         x = self.filterbank(x)
         mask = self.nsnet(torch.log10(torch.max(x.abs()**2, 1e-8 * torch.ones_like(x, dtype=torch.float32))))
-        x_real = mask * x.real
-        x_imag = mask * x.imag
 
-        return self.filterbank.decoder(x_real, x_imag)
-
-class FFTModel(nn.Module):
-    def __init__(self, fs=16000, signal_length=5):
-        super().__init__()
-
-        self.fs = fs
-        self.signal_length = signal_length
-
-        self.nsnet = NSNet()
-        self.specgram = Spectrogram(
-            n_fft=512, win_length=512, hop_length=256, power=None
-        )
-        self.power_specgram = Spectrogram(
-            n_fft=512, win_length=512, hop_length=256, power=2
-        )
-        self.inverse_specgram = InverseSpectrogram(
-            n_fft=512, win_length=512, hop_length=256
-        )
-    
-    def forward(self, x):
-        self.specgram = self.specgram.to(x.device)
-        self.power_specgram: Spectrogram = self.power_specgram.to(x.device)
-        self.inverse_specgram = self.inverse_specgram.to(x.device)
-
-        x_fft = self.specgram(x)
-        x = torch.log10(
-            torch.max(
-                self.power_specgram(x),
-                torch.ones(
-                    x.shape[0],
-                    257,
-                    self.fs * self.signal_length // 255,
-                    dtype=torch.float32,
-                ).to(x.device)
-                * 1e-6,
-            )
-        )[:, :-1, :]
-        x = self.nsnet(x)
-
-        x = (
-        torch.cat(
-                [
-                    torch.ones(x.shape[0], 1, x.shape[2]).to(x.device),
-                    x,
-                ],
-                axis=1,
-            )
-            * x_fft
-        )
-
-        return self.inverse_specgram(x)
+        return self.filterbank.decoder(mask * x)

@@ -1,14 +1,13 @@
 import torch
 
 class ComplexCompressedMSELoss(torch.nn.Module):
-    def __init__(self, beta: float = 0.0):
+    def __init__(self):
         super().__init__()
 
         self.c = 0.3
         self.l = 0.3
-        self.beta = beta
 
-    def forward(self, enhanced: torch.tensor, clean: torch.tensor, w=None):
+    def forward(self, enhanced: torch.tensor, clean: torch.tensor):
         enhanced_mag = torch.max(
             torch.abs(enhanced), 1e-8 * torch.ones(enhanced.shape).to(enhanced.device)
         )
@@ -32,15 +31,4 @@ class ComplexCompressedMSELoss(torch.nn.Module):
             ** 2
         )
 
-        loss = (1 - self.l) * mag_compressed_loss + self.l * phasor_loss
-
-        if w is not None:
-            w_hat = torch.sum(torch.abs(torch.fft.fft(w, dim=1)) ** 2, dim=0)
-            B = torch.max(w_hat, dim=0).values
-            A = torch.min(w_hat, dim=0).values
-
-            loss_ = loss +  self.beta * (B / A - 1)
-
-            return loss, loss_
-        else:
-            return loss, None
+        return (1 - self.l) * mag_compressed_loss + self.l * phasor_loss

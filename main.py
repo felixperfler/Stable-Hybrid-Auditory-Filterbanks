@@ -12,9 +12,11 @@ from pesq import pesq_batch
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
+from hybra import HybrALoss
+
 from src.datasets import Chime2
 from src.losses import ComplexCompressedMSELoss
-from src.model import HybridfilterbankModel, FFTModel
+from src.model import HybridfilterbankModel
 
 # set seed
 torch.manual_seed(0)
@@ -34,14 +36,10 @@ def main(args):
     SIGNAL_LENGTH = args.signal_length
     KAPPA_BETA = args.kappa_beta
     LEARNING_RATE = args.learning_rate
-    FFT_INPUT = args.fft_input
 
     print(device := torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"))
 
-    if FFT_INPUT :
-        model = FFTModel()
-    else:
-        model = HybridfilterbankModel()
+    model = HybridfilterbankModel()
 
     print(
         "Number of model parameters: ",
@@ -58,10 +56,7 @@ def main(args):
     # init tensorboard
     writer = SummaryWriter(f"{LOGGING_DIR}")
 
-    if KAPPA_BETA is None:
-        loss_fn = ComplexCompressedMSELoss()
-    else:
-        loss_fn = ComplexCompressedMSELoss(beta=KAPPA_BETA)
+    loss_fn = HybrALoss(ComplexCompressedMSELoss(), 1, 0, 0)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
 
@@ -108,24 +103,13 @@ def main(args):
                 target_signal = batch["clean"].to(device)
 
                 enhanced_signal = model(noisy_signal)
-                target_signal = target_signal[..., : enhanced_signal.shape[-1]]
 
-                if FFT_INPUT:
-                    target_signal_coefficients = model.specgram(target_signal)
-                else:
-                    target_signal_coefficients = model.filterbank.encoder(target_signal)
-                    enhanced_signal_coefficients = model.filterbank.encoder(enhanced_signal)
-
-                if KAPPA_BETA is not None:
-                    # TODO: CHECK why the hybra auditory filters are not tight
-                    # filterbank_weights = model.filterbank.hybra_filters_real.squeeze(1) + 1j*model.filterbank.hybra_filters_imag.squeeze(1)
-                    filterbank_weights = model.filterbank.encoder_weight_real.squeeze(1) + 1j*model.filterbank.encoder_weight_imag.squeeze(1)
-                else:
-                    filterbank_weights = None
+                target_signal_coefficients = model.filterbank.encoder(target_signal)
+                enhanced_signal_coefficients = model.filterbank.encoder(enhanced_signal)
 
                 loss, loss_ = loss_fn(
                     enhanced_signal_coefficients, target_signal_coefficients,
-                    filterbank_weights
+                    model.filterbank
                 )
 
                 running_loss += loss.item()
@@ -155,24 +139,14 @@ def main(args):
                         target_signal = batch["clean"].to(device)
 
                         enhanced_signal = model(noisy_signal)
-                        target_signal = target_signal[..., : enhanced_signal.shape[-1]]
 
-                        if FFT_INPUT:
-                            target_signal_coefficients = model.specgram(target_signal)
-                        else:
-                            target_signal_coefficients = model.filterbank.encoder(target_signal)
-                            enhanced_signal_coefficients = model.filterbank.encoder(enhanced_signal)
-
-                        if KAPPA_BETA is not None:
-                            # filterbank_weights = model.filterbank.hybra_filters_real.squeeze(1) + 1j*model.filterbank.hybra_filters_imag.squeeze(1)
-                            filterbank_weights = model.filterbank.encoder_weight_real.squeeze(1) + 1j*model.filterbank.encoder_weight_imag.squeeze(1)
-                        else:
-                            filterbank_weights = None
+                        target_signal_coefficients = model.filterbank.encoder(target_signal)
+                        enhanced_signal_coefficients = model.filterbank.encoder(enhanced_signal)
 
                         loss, loss_ = loss_fn(
                             enhanced_signal_coefficients,
                             target_signal_coefficients,
-                            filterbank_weights,
+                            model.filterbank,
                         )
 
                         running_val_loss += loss.item()
@@ -191,7 +165,7 @@ def main(args):
                         sisdr += sisdr_loop
 
                         tepoch.set_postfix(
-                            loss=loss.item(), PESQ=pesq_loop, SISDR=sisdr_loop
+                            loss=loss.item(), PESQ=pesq_loop, SISDR=sisdr_loop.item()
                         )
 
             writer.add_audio(
@@ -202,10 +176,10 @@ def main(args):
 
             writer.add_scalar("PESQ Val", pesq / len(dataloader_val), epoch)
             writer.add_scalar("SISDR Val", sisdr / len(dataloader_val), epoch)
-            if not FFT_INPUT:
-                writer.add_scalar(
-                    "Condition Number", model.filterbank.condition_number, epoch
-                )
+
+            writer.add_scalar(
+                "Condition Number", model.filterbank.condition_number, epoch
+            )
 
             writer.add_scalars(
                 "Loss",
@@ -230,7 +204,6 @@ def main(args):
                     "SISDR":  sisdr / len(dataloader_val),
                     "fs": FS,
                     "signal_length": SIGNAL_LENGTH,
-                    "fft_input": FFT_INPUT,
                 },
                 f"{LOGGING_DIR}/models/model_{epoch}.pth",
             )
@@ -295,11 +268,6 @@ if __name__ == "__main__":
         type=float,
         default=1e-4,
         help="Learning rate of the optimizer.",
-    )
-    parser.add_argument(
-        "--fft_input",
-        action=argparse.BooleanOptionalAction,
-        help="Use FFT input or not"
     )
 
     main(parser.parse_args())
