@@ -138,7 +138,7 @@ def main(args):
                         target_signal = batch["clean"].to(device)
 
                         enhanced_signal_coefficients = model(noisy_signal)
-                        enhanced_signal = model.filtebank.decoder(enhanced_signal_coefficients)
+                        enhanced_signal = model.filterbank.decoder(enhanced_signal_coefficients)
 
                         target_signal_coefficients = model.filterbank.encoder(target_signal)
 
