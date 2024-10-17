@@ -102,10 +102,9 @@ def main(args):
                 noisy_signal = batch["noisy"].to(device)
                 target_signal = batch["clean"].to(device)
 
-                enhanced_signal = model(noisy_signal)
+                enhanced_signal_coefficients = model(noisy_signal)
 
                 target_signal_coefficients = model.filterbank.encoder(target_signal)
-                enhanced_signal_coefficients = model.filterbank.encoder(enhanced_signal)
 
                 loss, loss_ = loss_fn(
                     enhanced_signal_coefficients, target_signal_coefficients,
@@ -138,10 +137,10 @@ def main(args):
                         noisy_signal = batch["noisy"].to(device)
                         target_signal = batch["clean"].to(device)
 
-                        enhanced_signal = model(noisy_signal)
+                        enhanced_signal_coefficients = model(noisy_signal)
+                        enhanced_signal = model.filtebank.decoder(enhanced_signal_coefficients)
 
                         target_signal_coefficients = model.filterbank.encoder(target_signal)
-                        enhanced_signal_coefficients = model.filterbank.encoder(enhanced_signal)
 
                         loss, loss_ = loss_fn(
                             enhanced_signal_coefficients,
