@@ -45,4 +45,4 @@ class HybridfilterbankModel(nn.Module):
         x = self.filterbank(x)
         mask = self.nsnet(torch.log10(torch.max(x.abs()**2, 1e-8 * torch.ones_like(x, dtype=torch.float32))))
 
-        return self.filterbank.decoder(mask * x)
+        return mask * x
