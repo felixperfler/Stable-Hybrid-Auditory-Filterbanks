@@ -6,6 +6,11 @@
 > **Equal contribution*\
 > Paper: https://arxiv.org/abs/2408.17358
 
+## ✨✨NEW✨✨
+We release an implementation as a module for easy inclusion in your models at:
+https://github.com/danedane-haider/HybrA-Filterbanks
+
+
 ## About
 
 Convolutional layers with 1-D filters are often used as frontend to encode audio signals. Unlike fixed time—frequency representations, they can adapt to the local characteristics of input data.
